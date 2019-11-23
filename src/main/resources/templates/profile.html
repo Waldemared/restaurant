@@ -1,0 +1,17 @@
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Profile</title>
+
+    </head>
+    <body>
+        <h2>This is profile page</h2>
+        <div th:if="${manager}">
+            <div th:text="${manager.name}"></div>
+            <div th:text="${manager.login}"></div>
+        </div>
+        <div th:unless="${manager}">
+            Not authecated!
+        </div>
+
+    </body>
+</html>

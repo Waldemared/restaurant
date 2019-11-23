@@ -1,0 +1,69 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <ul>
+                    <li class="yellow"><a href="index.html">Firefox</a></li>
+                    <li class="green"><a th:href="@{/register}">Register</a></li>
+                    <li class="active"><a th:href="@{/}">Main Page</a></li>
+                    <li class="red"><a th:href="@{/profile}">Profile</a></li>
+                    <li class="purple"><a th:href="@{/ingredients}">Ingredients</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="page_content">
+        <form action="/ingredients" method="post">
+            <div class="info_block" th:if="${!#sets.isEmpty(info)}">
+                <div class="success_block" th:if="${#sets.contains(info, 'success')}">
+                    Успешно добавлено.<br>
+                </div>
+                <div class="error_block" th:unless="${#sets.contains(info, 'success')}">
+                    <b>Возникли некоторые ошибки:</b><br>
+                    <span th:if="${#sets.contains(info, 'exists')}">Ингредиент с данным названием уже существует<br></span>
+                    <span th:if="${#sets.contains(info, 'name')}">Поле с названием не может быть пустым<br></span>
+                    <span th:if="${#sets.contains(info, 'quantity')}">Некорректное количество товара<br></span>
+                </div>
+            </div>
+            <label>Название</label><br>
+            <input type="text" name="name"><br>
+            <label>Количество</label><br>
+            <input type="number" name="quantity"><br>
+            <button type="submit">Добавить <i class="fas fa-plus-square"></i></button><br>
+        </form>
+        <br>
+        <label>Список продуктов:</label>
+        <table>
+            <tr>
+                <th>Название</th>
+                <th>Количество</th>
+                <th>Последняя поставка</th>
+                <th>Управление</th>
+            </tr>
+            <th:block th:each="ingredient : ${ingredients}">
+                <tr>
+                    <td th:text="${ingredient.getName()}"></td>
+                    <td th:text="${ingredient.getQuantity() == null ? 0 : ingredient.getQuantity()}"></td>
+                    <td th:text="${ingredient.getLastSupplyDate() == null ? 'Отсутствует' : ingredient.getLastSupplyDate()}"></td>
+                    <td>
+                        <a th:href="@{'/ingredients/' + ${ingredient.getId()}}"><button>Изменить <i class="fas fa-edit"></i></button></a>
+                        <form th:action="@{'/ingredients/' + ${ingredient.getId()} + '/delete'}" method="post">
+                            <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            </th:block>
+        </table>
+    </div>
+
+
+</body>
+</html>

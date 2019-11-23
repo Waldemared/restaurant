@@ -1,0 +1,46 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="container">
+                <ul>
+                    <li class="yellow"><a href="index.html">Firefox</a></li>
+                    <li class="green"><a th:href="@{/register}">Register</a></li>
+                    <li class="active"><a th:href="@{/}">Main Page</a></li>
+                    <li class="red"><a th:href="@{/profile}">Profile</a></li>
+                    <li class="purple"><a th:href="@{/ingredients}">Ingredients</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="page_content">
+        <form th:action="@{'/ingredients/' + ${ingredient.getId()} + '/update'}" method="post">
+            <div class="info_block" th:if="${!#sets.isEmpty(info)}">
+                <div class="success_block" th:if="${#sets.contains(info, 'success')}">
+                    Успешно изменено<br>
+                </div>
+                <div class="error_block" th:unless="${#sets.contains(info, 'success')}">
+                    Возникли некоторые ошибки:<br>
+                    <span th:if="${#sets.contains(info, 'exists')}"><br></span>
+                    <span th:if="${#sets.contains(info, 'name')}">Продукт с данным названием уже существует<br></span>
+                    <span th:if="${#sets.contains(info, 'йгфтеше')}">Недопустимое количество продукта<br></span>
+                </div>
+            </div>
+            <label>Название</label><br>
+            <input type="text" name="name" th:value="${ingredient.getName()}"><br>
+            <label>Количество</label><br>
+            <input type="number" name="quantity" th:value="${ingredient.getQuantity()}"><br>
+            <button type="submit">Подтвердить <i class="fas fa-check-circle"></i></button>
+        </form>
+        <form th:action="@{'/ingredients/' + ${ingredient.getId()} + '/delete'}" method="post">
+            <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
+        </form>
+    </div>
+</body>
+</html>
