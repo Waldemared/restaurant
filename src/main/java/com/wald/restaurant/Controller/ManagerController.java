@@ -13,38 +13,27 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 public class ManagerController {
-    ManagerService managerService;
-    ManagerRepository managerRepository;
+    private final ManagerService managerService;
 
-    ManagerController(@Autowired ManagerService managerService,
-                      @Autowired ManagerRepository managerRepository) {
+    ManagerController(@Autowired ManagerService managerService) {
         this.managerService = managerService;
-        this.managerRepository = managerRepository;
     }
 
     @GetMapping("/")
-    public String mainPage(Model model) {
-        return "index";
+    public RedirectView mainPage(Model model) {
+        return new RedirectView("/ingredients");
     }
 
     @GetMapping("/profile")
     public String getSelfPage(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Manager manager = null;
-        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ANONYMOUS")))
-            manager = ((CustomUserDetails)auth.getPrincipal()).getManager();
-        model.addAttribute("let", 100);
+        Manager manager = managerService.getSelf();
         model.addAttribute("manager", manager);
         return "profile";
     }
@@ -55,8 +44,13 @@ public class ManagerController {
                                  @RequestParam String login,
                                  @RequestParam String password) {
         attributes.addFlashAttribute("info", managerService.add(name, login, password));
-        RedirectView redirectView = new RedirectView("/register");
-        return redirectView;
+        return new RedirectView("/register");
+    }
+
+    @PostMapping("/profile/update")
+    public RedirectView profileUpdate(RedirectAttributes attributes, @RequestParam String name) {
+        attributes.addFlashAttribute("updateInfo", managerService.update(name));
+        return new RedirectView("/profile");
     }
 
     @GetMapping("/register")
@@ -65,5 +59,4 @@ public class ManagerController {
         System.out.println(Optional.ofNullable(attr).toString());
         return "register";
     }
-
 }

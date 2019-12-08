@@ -1,0 +1,101 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Поставка ' + ${supply.getSupplier().getName()}"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+</head>
+<body>
+    <div th:insert="header"></div>
+    <div class="page_content">
+        <label><b>Делати поставки</b></label>
+        <ul>
+            <li>Поставщик: <a th:href="@{'/suppliers/' + ${supply.getSupplier().getId()}}" th:text="${supply.getSupplier().getName()}"></a></li>
+            <li th:if="${supply.getManager() != null}">Менеджер: <a th:href="@{'/managers/' + ${supply.getManager().getId()}}" th:text="${supply.getManager().getName()}"></a></li>
+            <li th:text="'Создано: ' + ${supply.getFormattedCreationDateTime()}"></li>
+            <li th:text="'Опубликовано: ' + ${supply.getFormattedPublishingDateTime()}" th:if="${supply.getPublished()}"></li>
+        </ul>
+        <div th:unless="${supply.getPublished()}">
+            <form th:action="@{'/supplies/' + ${supply.getId()} + '/publish'}" th:if="${supply.getSupplyItems().size() > 0}"  method="post">
+                <button type="submit">Опубликовать <i class="fas fa-check-circle"></i></button>
+            </form>
+            <form th:action="@{'/supplies/' + ${supply.getId()} + '/delete'}" method="post">
+                <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
+            </form>
+            <br>
+            <form th:if="${!freeIngredients.isEmpty()}" th:action="@{'/supplies/' + ${supply.getId()} + '/items'}" method="post" id="addItem">
+                <label><b>Добавить продукт</b></label>
+                <div class="info_block" th:if="${!#sets.isEmpty(addInfo)}">
+                    <div class="error_block" th:unless="${#sets.contains(addInfo, 'success')}">
+                        Возникли некоторые ошибки:<br>
+                        <span th:if="${#sets.contains(addInfo, 'exists')}"><br></span>
+                        <span th:if="${#sets.contains(addInfo, 'name')}">Продукт с данным названием уже существует<br></span>
+                        <span th:if="${#sets.contains(addInfo, 'quantity')}">Недопустимое количество продукта<br></span>
+
+                    </div>
+                </div>
+                <br>
+                <label>Продукт</label><br>
+                <select name="ingredientId" form="addItem">
+                    <th:block th:each="ingredient : ${freeIngredients}">
+                        <option th:value="${ingredient.getId()}" th:text="${ingredient.getName()}"></option>
+                    </th:block>
+                </select>
+                <br>
+                <label>Количество</label><br>
+                <input type="number" name="quantity" step="0.1"><br>
+                <button type="submit">Добавить <i class="fas fa-plus-square"></i></button>
+            </form>
+
+            <br>
+
+            <div class="info_block" th:if="${!#sets.isEmpty(updateItemInfo)}">
+                <div class="success_block" th:if="${#sets.contains(updateItemInfo, 'success')}">
+                    Успешно изменено<br>
+                </div>
+                <div class="error_block" th:unless="${#sets.contains(updateItemInfo, 'success')}">
+                    Возникли некоторые ошибки:<br>
+                    <span th:if="${#sets.contains(updateItemInfo, 'quantity')}">Недопустимое поличество продукта<br></span>
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+
+        <div th:if="${supply.getSupplyItems().size() > 0}">
+            <label>Список продуктов:</label>
+            <table>
+                <tr>
+                    <th>Название</th>
+                    <th>Количество</th>
+                    <th th:if="${!supply.getPublished()}">Управление</th>
+                </tr>
+                <th:block th:each="supplyItem : ${supply.getSupplyItems()}">
+                    <tr>
+                        <td th:text="${supplyItem.getIngredient().getName()}"></td>
+                        <form th:action="@{'/supplies/' + ${supply.getId()} + '/items/' + ${supplyItem.getId()} + '/update'}" th:if="${!supply.getPublished()}" method="post" th:id="'updateItem' + ${supplyItem.getId()}">
+                            <td>
+                                <input name="quantity" type="number" th:value="${supplyItem.getQuantity()}" step="0.1"> г/кг
+                                <input name="itemId" type="hidden" th:value="${supplyItem.getId()}">
+                            </td>
+                        </form>
+                        <td th:if="${supply.getPublished()}">
+                            <span th:text="${supplyItem.getQuantity()} + ' кг'"></span>
+                        </td>
+                        <td th:if="${!supply.getPublished()}">
+                            <button type="submit" th:form="'updateItem' + ${supplyItem.getId()}">Изменить <i class="fas fa-edit"></i></button>
+                            <form th:action="@{'/supplies/' + ${supply.getId()} + '/items/' + ${supplyItem.getId()} + '/delete'}" method="post">
+                                <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                </th:block>
+            </table>
+        </div>
+        <div th:unless="${supply.getSupplyItems().size() > 0}">
+            <label>Поставка не содержит продуктов</label>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,7 +1,9 @@
 package com.wald.restaurant.Model;
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Data
@@ -20,6 +22,10 @@ public class Manager {
 
     @Column(name = "password")
     private String password;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL)
+    private List<Supply> supplies;
 
     @Column(name = "enabled")
     private Boolean enabled;

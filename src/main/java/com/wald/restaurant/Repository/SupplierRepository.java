@@ -1,10 +1,10 @@
 package com.wald.restaurant.Repository;
-import com.wald.restaurant.Model.Ingredient;
+import com.wald.restaurant.Model.Supplier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface IngredientRepository extends JpaRepository<Ingredient, Integer> {
-    public Optional<Ingredient> findByName(String name);
+public interface SupplierRepository extends JpaRepository<Supplier, Integer> {
+    Optional<Supplier> findByName(String name);
 }

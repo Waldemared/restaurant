@@ -1,0 +1,64 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Блюда</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+</head>
+<body>
+    <div th:insert="header"></div>
+    <div class="page_content">
+        <form action="/dishes/add" method="post">
+            <div class="info_block" th:if="${!#sets.isEmpty(addInfo)}">
+                <div class="success_block" th:if="${#sets.contains(addInfo, 'success')}">
+                    Успешно добавлено.<br>
+                </div>
+                <div class="error_block" th:unless="${#sets.contains(addInfo, 'success')}">
+                    <b>Возникли некоторые ошибки:</b><br>
+                    <span th:if="${#sets.contains(addInfo, 'exists')}">Блюдо с данным названием уже существует<br></span>
+                    <span th:if="${#sets.contains(addInfo, 'name')}">Поле с названием не может быть пустым<br></span>
+                    <span th:if="${#sets.contains(addInfo, 'usage')}">Некорректный расход блюда<br></span>
+                </div>
+            </div>
+            <label>Название</label><br>
+            <input type="text" name="name"><br>
+            <label>Расход блюда кг/неделя</label><br>
+            <input type="number" name="usage" step="0.1"><br>
+            <button type="submit">Добавить <i class="fas fa-plus-square"></i></button><br>
+        </form>
+        <br>
+        <label>Список продуктов:</label>
+        <table>
+            <tr>
+                <th>Название</th>
+                <th>Продукты</th>
+                <th>Количество</th>
+                <th>Расход блюда</th>
+                <th>Управление</th>
+            </tr>
+            <th:block th:each="dish : ${dishes}">
+                <tr>
+                    <td><a th:href="@{'/dishes/' + ${dish.getId()}}" th:text="${dish.getName()}"></a></td>
+                    <td>
+                        <th:block th:each="dishItem : ${dish.getDishItems()}">
+                            <a th:href="@{'/ingredients/' + ${dishItem.getIngredient().getId()}}" th:text="${dishItem.getIngredient().getName()}"></a><br>
+                        </th:block>
+                    </td>
+                    <td><th:block th:each="dishItem : ${dish.getDishItems()}"><label th:text="${dishItem.getQuantity()} + ' г'"></label><br></th:block></td>
+                    <td th:text="${dish.getUsageCoef() == null ? 0 : dish.getUsageCoef()} + ' кг/неделя'"></td>
+
+                    <td>
+                        <a th:href="@{'/dishes/' + ${dish.getId()}}"><button>Изменить <i class="fas fa-edit"></i></button></a>
+                        <form th:action="@{'/dishes/' + ${dish.getId()} + '/delete'}" method="post">
+                            <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            </th:block>
+        </table>
+    </div>
+
+
+</body>
+</html>

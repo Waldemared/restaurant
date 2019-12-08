@@ -22,12 +22,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                //.antMatchers("/**").permitAll()
-                    .anyRequest().permitAll()
+                    .anyRequest().authenticated()
                 .and()
-
                     .formLogin()
-                    //.loginPage("/login")
                     .defaultSuccessUrl("/")
                 .and()
                     .csrf().disable();
@@ -36,20 +33,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new SCryptPasswordEncoder();
-    }
-
-
-    public PasswordEncoder emptyPE() {
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence charSequence) {
-                return charSequence.toString();
-            }
-
-            @Override
-            public boolean matches(CharSequence charSequence, String s) {
-                return true;
-            }
-        };
     }
 }

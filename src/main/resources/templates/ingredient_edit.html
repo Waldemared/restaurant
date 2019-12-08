@@ -1,24 +1,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Profile</title>
+    <title th:text="'Ингредиент ' + ${ingredient.getName()}"></title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="container">
-                <ul>
-                    <li class="yellow"><a href="index.html">Firefox</a></li>
-                    <li class="green"><a th:href="@{/register}">Register</a></li>
-                    <li class="active"><a th:href="@{/}">Main Page</a></li>
-                    <li class="red"><a th:href="@{/profile}">Profile</a></li>
-                    <li class="purple"><a th:href="@{/ingredients}">Ingredients</a></li>
-                </ul>
-            </div>
-        </nav>
-    </header>
+    <div th:insert="header"></div>
     <div class="page_content">
         <form th:action="@{'/ingredients/' + ${ingredient.getId()} + '/update'}" method="post">
             <div class="info_block" th:if="${!#sets.isEmpty(info)}">
@@ -29,18 +17,99 @@
                     Возникли некоторые ошибки:<br>
                     <span th:if="${#sets.contains(info, 'exists')}"><br></span>
                     <span th:if="${#sets.contains(info, 'name')}">Продукт с данным названием уже существует<br></span>
-                    <span th:if="${#sets.contains(info, 'йгфтеше')}">Недопустимое количество продукта<br></span>
+                    <span th:if="${#sets.contains(info, 'quantity')}">Недопустимое количество продукта<br></span>
                 </div>
             </div>
             <label>Название</label><br>
             <input type="text" name="name" th:value="${ingredient.getName()}"><br>
-            <label>Количество</label><br>
-            <input type="number" name="quantity" th:value="${ingredient.getQuantity()}"><br>
+            <label>Количество товара на складе (кг)</label><br>
+            <input type="number" name="quantity" th:value="${ingredient.getQuantity()}" step="0.1"><br>
             <button type="submit">Подтвердить <i class="fas fa-check-circle"></i></button>
         </form>
         <form th:action="@{'/ingredients/' + ${ingredient.getId()} + '/delete'}" method="post">
             <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
         </form>
+        <th:block th:if="${ingredient.getSuppliers().size() > 0}">
+        <br>
+        <label>Список поставщиков:</label>
+        <table>
+            <tr>
+                <th>Поставщик</th>
+                <th>Время работы по будням</th>
+                <th>Время работы по выходным</th>
+                <th>Управление</th>
+            </tr>
+            <th:block th:each="supplier : ${ingredient.getSuppliers()}">
+                <tr>
+                    <td><a th:href="@{'/suppliers/' + ${supplier.getId()}}" th:text="${supplier.getName()}"></a></td>
+                    <td th:text="${supplier.getWeekDaysBeginTime().toString() + ' - ' + supplier.getWeekDaysEndTime().toString()}"></td>
+                    <td th:text="${supplier.getWeekEndsBeginTime().toString() + ' - ' + supplier.getWeekEndsEndTime().toString()}"></td>
+                    <td>
+                        <a th:href="@{'/suppliers/' + ${supplier.getId()}}">
+                            <button type="submit">Детали <i class="fas fa-info-circle"></i></button>
+                        </a>
+                    </td>
+                </tr>
+            </th:block>
+        </table>
+        </th:block>
+
+        <th:block th:if="${ingredient.getSupplyItems().size() > 0}">
+        <br>
+        <label>Список поставок: </label>
+        <table>
+            <tr>
+                <th>Поставщик</th>
+                <th>Менеджер поставки</th>
+                <th>Дата</th>
+                <th>Управление</th>
+            </tr>
+            <th:block th:each="supplyItem : ${ingredient.getSupplyItems()}">
+                <tr>
+                    <td><a th:href="@{'/suppliers/' + ${supplyItem.getSupply().getSupplier().getId()}}" th:text="${supplyItem.getSupply().getSupplier().getName()}"></a></td>
+                    <td >
+                        <label th:text="${supplyItem.getSupply().getManager().getName()}"></label>
+                    </td>
+                    <td style="text-align: end">
+                        <label th:text="'Создание: ' + ${supplyItem.getSupply().getFormattedCreationDateTime()}"></label><br>
+                        <label th:text="'Публикация: ' + ${supplyItem.getSupply().getFormattedPublishingDateTime()}" th:if="${supplyItem.getSupply().getPublished()}"></label>
+                    </td>
+                    <td>
+                        <a th:href="@{'/supplies/' + ${supplyItem.getSupply().getId()}}">
+                            <button type="submit">Детали <i class="fas fa-info-circle"></i></button>
+                        </a>
+                    </td>
+                </tr>
+            </th:block>
+        </table>
+        </th:block>
+
+        <br>
+
+        <th:block th:if="${ingredient.getDishItems().size() > 0}">
+            <br>
+            <label>Список блюд:</label>
+            <table>
+                <tr>
+                    <th>Название</th>
+                    <th>Использование продукта</th>
+                    <th>Расход блюда</th>
+                    <th>Управление</th>
+                </tr>
+                <th:block th:each="dishItem : ${ingredient.getDishItems()}">
+                    <tr>
+                        <td><a th:href="@{'/dishes/' + ${dishItem.getDish().getId()}}" th:text="${dishItem.getDish().getName()}"></a></td>
+                        <td th:text="${dishItem.getQuantity()} + ' г/кг'"></td>
+                        <td th:text="${dishItem.getDish().getUsageCoef() == null ? 0 : dishItem.getDish().getUsageCoef()} + ' кг/неделя'"></td>
+                        <td>
+                            <a th:href="@{'/dishes/' + ${dishItem.getDish().getId()}}">
+                                <button type="submit">Детали <i class="fas fa-info-circle"></i></button>
+                            </a>
+                        </td>
+                    </tr>
+                </th:block>
+            </table>
+        </th:block>
     </div>
 </body>
 </html>

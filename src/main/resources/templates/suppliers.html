@@ -1,0 +1,75 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Поставщики</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+</head>
+<body>
+    <div th:insert="header"></div>
+    <div class="page_content">
+        <form action="/suppliers" method="post">
+            <div class="info_block" th:if="${!#sets.isEmpty(addInfo)}">
+                <div class="success_block" th:if="${#sets.contains(addInfo, 'success')}">
+                    Успешно добавлено.<br>
+                </div>
+                <div class="error_block" th:unless="${#sets.contains(addInfo, 'success')}">
+                    <b>Возникли некоторые ошибки:</b><br>
+                    <span th:if="${#sets.contains(addInfo, 'exists')}">Поставщик с данным названием уже существует<br></span>
+                    <span th:if="${#sets.contains(addInfo, 'name')}">Поле с названием не может быть пустым<br></span>
+                    <span th:if="${#sets.contains(addInfo, 'time')}">Некорректно заполены поля с временем работы<br></span>
+                </div>
+            </div>
+            <label>Название</label><br>
+            <input type="text" name="name" required><br>
+            <label>Время работы по будням</label>
+            <input type="time" name="weekDaysBeginTime" required>
+            <label> - </label>
+            <input type="time" name="weekDaysEndTime" required>
+            <br>
+            <label>Время работы по выходным</label>
+            <input type="time" name="weekEndsBeginTime" required>
+            <label> - </label>
+            <input type="time" name="weekEndsEndTime" required>
+            <br>
+            <button type="submit">Добавить <i class="fas fa-plus-square"></i></button><br>
+        </form>
+        <br>
+        <label>Список поставщиков:</label>
+        <table>
+            <tr>
+                <th>Поставщик</th>
+                <th>Время работы по будням</th>
+                <th>Время работы по выходным</th>
+                <th>Продукты</th>
+                <th>Управление</th>
+            </tr>
+            <th:block th:each="supplier : ${suppliers}">
+                <tr>
+                    <td th:text="${supplier.getName()}"></td>
+                    <td th:text="${supplier.getWeekDaysBeginTime().toString() + ' - ' + supplier.getWeekDaysEndTime().toString()}"></td>
+                    <td th:text="${supplier.getWeekEndsBeginTime().toString() + ' - ' + supplier.getWeekEndsEndTime().toString()}"></td>
+                    <td>
+                        <th:block th:each="ingredient, iter : ${supplier.getIngredients()}">
+                            <span th:if="${iter.index < 5}">
+                                <a th:href="@{'/ingredients/' + ${ingredient.getId()}}" th:text="${ingredient.getName()}"></a>
+                                <br>
+                            </span>
+                            <label th:if="${iter.index == 5}" th:text="..."></label>
+                        </th:block>
+                    </td>
+                    <td>
+                        <a th:href="@{'/suppliers/' + ${supplier.getId()}}"><button>Изменить <i class="fas fa-edit"></i></button></a>
+                        <form th:action="@{'/suppliers/' + ${supplier.getId()} + '/delete'}" method="post">
+                            <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            </th:block>
+        </table>
+    </div>
+
+
+</body>
+</html>

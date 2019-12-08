@@ -1,9 +1,12 @@
 package com.wald.restaurant.Model;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -16,8 +19,26 @@ public class Ingredient {
     @Column(name = "ingredient_name")
     private String name;
 
-    private Integer quantity;
+    private Float quantity;
 
-    @Column(name = "last_supply_date")
-    private Date lastSupplyDate;
+    @ManyToMany
+    @JoinTable(schema = "restaurant", name = "supplier_ingredient",
+            joinColumns = @JoinColumn(name = "ingredient_id"),
+            inverseJoinColumns = @JoinColumn(name = "supplier_id"))
+    private List<Supplier> suppliers;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DishItem> dishItems;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SupplyItem> supplyItems;
+
+    @Transient
+    private Float estimatedBalanceViaDays;
+
+    public List<SupplyItem> getPublishedSupplyItems() {
+        return this.supplyItems.stream().filter(supplyItem -> supplyItem.getSupply().getPublished()).collect(Collectors.toList());
+    }
 }

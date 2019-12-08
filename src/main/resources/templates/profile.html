@@ -1,17 +1,82 @@
-<html xmlns:th="http://www.w3.org/1999/xhtml">
-    <head>
-        <title>Profile</title>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Мой профиль</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+</head>
+<body>
+    <div th:insert="header"></div>
+    <div class="page_content">
+        <form th:action="@{'/profile/update'}" method="post">
+            <div class="info_block" th:if="${!#sets.isEmpty(updateInfo)}">
+                <div class="success_block" th:if="${#sets.contains(updateInfo, 'success')}">
+                    Успешно изменено<br>
+                </div>
+                <div class="error_block" th:unless="${#sets.contains(updateInfo, 'success')}">
+                    Возникли некоторые ошибки:<br>
+                    <span th:if="${#sets.contains(updateInfo, 'exists')}">Поставщик с данным названием уже существует<br></span>
+                </div>
+            </div>
+            <label>Имя</label><br>
+            <input type="text" th:value="${manager.getName()}" name="name" required><br>
+            <br>
+            <button type="submit">Подтвердить <i class="fas fa-check-circle"></i></button>
+        </form>
 
-    </head>
-    <body>
-        <h2>This is profile page</h2>
-        <div th:if="${manager}">
-            <div th:text="${manager.name}"></div>
-            <div th:text="${manager.login}"></div>
-        </div>
-        <div th:unless="${manager}">
-            Not authecated!
-        </div>
+        <br>
 
+        <th:block th:if="${manager.getSupplies().size() > 0}">
+            <label>Список поставок:</label>
+            <table>
+                <tr>
+                    <th>Дата</th>
+                    <th>Продукты</th>
+                    <th>Количество</th>
+                    <th>Управление</th>
+                </tr>
+                <th:block th:each="supply : ${manager.getSupplies()}">
+                    <tr>
+                        <td style="text-align: end">
+                            <label th:text="'Создание: ' + ${supply.getFormattedCreationDateTime()}"></label><br>
+                            <label th:text="'Публикация: ' + ${supply.getFormattedPublishingDateTime()}" th:if="${supply.getPublished()}"></label>
+                        </td>
+                        <td>
+                            <th:block th:each="supplyItem, iter : ${supply.getSupplyItems()}">
+                                <span th:if="${iter.index < 5}">
+                                    <a th:href="@{'/ingredients/' + ${supplyItem.getIngredient().getId()}}" th:text="${supplyItem.getIngredient().getName()}"></a>
+                                    <br>
+                                </span>
+                                <label th:if="${iter.index == 5}" th:text="..."></label>
+                            </th:block>
+                        </td>
+                        <td>
+                            <th:block th:each="supplyItem, iter : ${supply.getSupplyItems()}">
+                                <span th:if="${iter.index < 5}">
+                                    <label th:text="${supplyItem.getQuantity()} + ' кг'"></label>
+                                    <br>
+                                </span>
+                                <label th:if="${iter.index == 5}" th:text="..."></label>
+                            </th:block>
+                        </td>
+                        <td th:if="${supply.getPublished()}">
+                            <a th:href="@{'/supplies/' + ${supply.getId()}}">
+                                <button type="submit">Детали <i class="fas fa-info-circle"></i></button>
+                            </a>
+                        </td>
+                        <td th:unless="${supply.getPublished()}">
+                            <form th:action="@{'/supplies/' + ${supply.getId()} + '/publish'}" th:if="${supply.getSupplyItems().size() > 0}"  method="post">
+                                <button type="submit">Опубликовать <i class="fas fa-check-circle"></i></button>
+                            </form>
+                            <a th:href="@{'/supplies/' + ${supply.getId()}}"><button>Изменить <i class="fas fa-edit"></i></button></a>
+                            <form th:action="@{'/supplies/' + ${supply.getId()} + '/delete'}" method="post">
+                                <button type="submit">Удалить <i class="far fa-trash-alt"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                </th:block>
+            </table>
+        </th:block>
+    </div>
     </body>
 </html>
