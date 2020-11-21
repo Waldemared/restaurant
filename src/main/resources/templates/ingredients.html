@@ -43,10 +43,10 @@
                 <tr th:class="${ingredient.getEstimatedBalanceViaDays() < 5 ? 'low_balance' : ''}">
                     <td th:text="${ingredient.getName()}"></td>
                     <td th:text="${ingredient.getQuantity() == null ? 0 : ingredient.getQuantity() + ' кг'}"></td>
-                    <td th:text="${ingredient.getEstimatedBalanceViaDays().isNaN()
+                    <td th:text="${ingredient.getEstimatedBalanceViaDays() == null || ingredient.getEstimatedBalanceViaDays().isNaN()
                                 ? #numbers.formatDecimal(1f / 0f, 1, 1) + ' дн.'
                                 : #numbers.formatDecimal(ingredient.getEstimatedBalanceViaDays(), 1, 1) + ' дн.'}"></td>
-                    <td th:if="${ingredient.getSupplyItems().size() > 0}">
+                    <td th:if="${ingredient.getSupplyItems() != null && ingredient.getSupplyItems().size() > 0}">
                         <th:block th:each="supplyItem, iter : ${T(com.wald.restaurant.model.Supply).getSupplyItemsSortedByDateTime(ingredient.getPublishedSupplyItems())}">
                             <span th:if="${iter.index < 5}">
                                 <a th:href="@{'/supplies/' + ${supplyItem.getSupply().getId()}}" th:text="${supplyItem.getSupply().getFormattedCreationDateTime()}"></a>
@@ -55,18 +55,18 @@
                             <label th:if="${iter.index == 5}" th:text="..."></label>
                         </th:block>
                     </td>
-                    <td th:unless="${ingredient.getSupplyItems().size() > 0}">
+                    <td th:unless="${ingredient.getSupplyItems() != null && ingredient.getSupplyItems().size() > 0}">
                         <label>Нет поставок</label>
                     </td>
                     <td>
-                        <th:block th:if="${ingredient.getSuppliers().size() > 0}" th:each="supplier, iter : ${ingredient.getSuppliers()}">
+                        <th:block th:if="${ingredient.getSuppliers() != null && ingredient.getSuppliers().size() > 0}" th:each="supplier, iter : ${ingredient.getSuppliers()}">
                             <span th:if="${iter.index < 5}">
                                 <a th:href="@{'/suppliers/' + ${supplier.getId()}}" th:text="${supplier.getName()}"></a>
                                 <br>
                             </span>
                             <label th:if="${iter.index == 5}" th:text="..."></label>
                         </th:block>
-                        <label th:if="${ingredient.getSuppliers().size() == 0}" th:text="${'Нет поставщиков'}"></label>
+                        <label th:if="${ingredient.getSuppliers() != null && ingredient.getSuppliers().size() == 0}" th:text="${'Нет поставщиков'}"></label>
                     </td>
                     <td>
                         <th:block th:each="dishItem, iter : ${ingredient.getDishItems()}">
