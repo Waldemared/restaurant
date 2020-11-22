@@ -47,7 +47,7 @@
                                 ? #numbers.formatDecimal(1f / 0f, 1, 1) + ' дн.'
                                 : #numbers.formatDecimal(ingredient.getEstimatedBalanceViaDays(), 1, 1) + ' дн.'}"></td>
                     <td th:if="${ingredient.getSupplyItems().size() > 0}">
-                        <th:block th:each="supplyItem, iter : ${T(com.wald.restaurant.Model.Supply).getSupplyItemsSortedByDateTime(ingredient.getPublishedSupplyItems())}">
+                        <th:block th:each="supplyItem, iter : ${T(com.wald.restaurant.model.Supply).getSupplyItemsSortedByDateTime(ingredient.getPublishedSupplyItems())}">
                             <span th:if="${iter.index < 5}">
                                 <a th:href="@{'/supplies/' + ${supplyItem.getSupply().getId()}}" th:text="${supplyItem.getSupply().getFormattedCreationDateTime()}"></a>
                                 <br>

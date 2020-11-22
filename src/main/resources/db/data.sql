@@ -1,0 +1,2 @@
+INSERT INTO manager (id, manager_name, login, password, enabled) VALUES
+(1, 'Администратор', 'admin', '$e0801$5N2/ViyEl0qKnUXJ2JyqScTWO8npY0OlWhvIQz1GBWEZaWgXi14I0W4oiySi0qKUrHHUvS0qqvcOGDQesmgPGA==$kLYfjn3ctMMyl4HGi4SJeZfh6ClKLKs7BU+bBp+Z/rU=', true);
