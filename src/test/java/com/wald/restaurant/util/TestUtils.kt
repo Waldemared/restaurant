@@ -5,15 +5,25 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module
 import javax.persistence.EntityManager
+import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.Predicate
+import javax.persistence.criteria.Root
 
 
 /**
- * This [EntityManager] extension provides an ability to fetch
- * all records of the [T] type from its persistence context
+ * This [EntityManager] extension provides an ability to fetch entities of the [T] type from its persistence context.
+ * Filters entities that do not satisfy the conditions provided by [predicateCreator], if the one is present.
  */
-inline fun <reified T> EntityManager.findAll(): List<T> {
+inline fun <reified T> EntityManager.findWhere(predicateCreator: (CriteriaBuilder, Root<T>) -> Predicate?): List<T> {
     val criteriaQuery = this.criteriaBuilder.createQuery(T::class.java)
-    val typedQuery = this.createQuery(criteriaQuery.select(criteriaQuery.from(T::class.java)))
+    val root = criteriaQuery.from(T::class.java)
+
+    criteriaQuery.select(root)
+    predicateCreator(this.criteriaBuilder, root)?.also {
+        criteriaQuery.where(it)
+    }
+
+    val typedQuery = this.createQuery(criteriaQuery)
 
     return typedQuery.resultList
 }
@@ -28,7 +38,6 @@ fun <T> T.convertToString(): String {
     try {
         return OBJECT_MAPPER.writeValueAsString(this)
     } catch (e: JsonProcessingException) {
-        throw e
         return this.toString()
     }
 }
@@ -41,3 +50,8 @@ val OBJECT_MAPPER = ObjectMapper().apply {
     configure(SerializationFeature.INDENT_OUTPUT, true)
     registerModule(Hibernate5Module())
 }
+
+/**
+ * A flash attribute that should be returned by controller by `info` key on successful invocation
+ */
+val SUCCESS_ONLY_SET = setOf("success")

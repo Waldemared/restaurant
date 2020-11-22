@@ -17,39 +17,41 @@ import java.util.Optional;
 public class ManagerController {
     private final ManagerService managerService;
 
-    ManagerController(@Autowired ManagerService managerService) {
+    @Autowired
+    ManagerController(final ManagerService managerService) {
         this.managerService = managerService;
     }
 
     @GetMapping("/")
-    public RedirectView mainPage(Model model) {
+    public RedirectView mainPage(final Model model) {
         return new RedirectView("/ingredients");
     }
 
     @GetMapping("/profile")
-    public String getSelfPage(Model model) {
+    public String getSelfPage(final Model model) {
         Manager manager = managerService.getSelf();
         model.addAttribute("manager", manager);
         return "profile";
     }
 
     @PostMapping("/register")
-    public RedirectView register(RedirectAttributes attributes,
-                                 @RequestParam String name,
-                                 @RequestParam String login,
-                                 @RequestParam String password) {
+    public RedirectView register(final RedirectAttributes attributes,
+                                 @RequestParam final String name,
+                                 @RequestParam final String login,
+                                 @RequestParam final String password) {
         attributes.addFlashAttribute("info", managerService.add(name, login, password));
         return new RedirectView("/register");
     }
 
     @PostMapping("/profile/update")
-    public RedirectView profileUpdate(RedirectAttributes attributes, @RequestParam String name) {
+    public RedirectView profileUpdate(final RedirectAttributes attributes,
+                                      @RequestParam final String name) {
         attributes.addFlashAttribute("updateInfo", managerService.update(name));
         return new RedirectView("/profile");
     }
 
     @GetMapping("/register")
-    public String registerPage(Model model) {
+    public String registerPage(final Model model) {
         Object attr = model.getAttribute("info");
         System.out.println(Optional.ofNullable(attr).toString());
         return "register";
